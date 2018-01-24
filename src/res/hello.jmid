@@ -1,0 +1,8 @@
+public class ID_8636{
+	public static void ID_40207(){
+		int ID_36751 = 10;
+		float ID_46517 = 20.34;
+		float ID_58853 = ID_36751 + ID_46517;
+		ID_20512(ID_58853 + "Hello world হ্যালো ওয়ার্ল্ড ");
+	}
+}
