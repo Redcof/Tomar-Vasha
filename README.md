@@ -11,21 +11,14 @@ We are finding peoples know _**हिंदी(Hindi)**_ and _**ಕನರಾ(Kan
    সবার স্থির ফাঁকা শুরু(){
       পূর্ণ আ = ১০;
       দশমিক ব = ২০.৩৪;
-      দশমিক ড় = আ +'9';
-      দেখ(ড় + "Hello world ফাঁকা");
+      বাক্য ড় = আ +'9';
+      দেখ(ড় + "Hello world ফাঁকা"+(আ + ব));
    }
 }
 ```
 ### Output:
 ```
-public class ID_8636{
-   public static void ID_40207(){
-      int ID_36751 = 10;
-      float ID_46517 = 20.34;
-      float ID_58853 = ID_36751 +'\'';
-      ID_20512(ID_58853 + "Hello world ফাঁকা");
-   }
-}
+১০9Hello world ফাঁকা ৩০.৩৪
 ```
 
 `copyright(c) 2018. Redcof `
