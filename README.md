@@ -3,7 +3,7 @@
 A _multilingual programming_ framework where software can be programmed and run with your own language.
 
 Current supported language is _**বাংলা(Bengali)**_. But a lot of journey we need to accomplish.
-We are haring peoples know _**हिंदी(Hindi)**_ and _**ಕನರಾ(Kanada)**_.For more details please contact [codeinfer@gmail.com](codeinfer@gmail.com). 
+We are finding peoples know _**हिंदी(Hindi)**_ and _**ಕನರಾ(Kanada)**_.For more details please contact [codeinfer@gmail.com](codeinfer@gmail.com). 
 
 ### Sample Input: 
 ```
