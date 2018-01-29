@@ -27,10 +27,11 @@ public abstract class BoomParser {
     boolean DoubleQuoteStarted = false;
     boolean SingleQuoteStarted = false;
 
-    int LastUTF8Char = 0;
+    int _LastUTF8Char = 0;
+    int _2ndLastUTF8Char = 0;
     int CurrectUTF8Char;
 
-    ArrayList<Integer> Sentense = new ArrayList<>();
+    ArrayList<Integer> Sentence = new ArrayList<>();
     ArrayList<String> Tokens;
 
     private boolean log = true;
@@ -44,45 +45,70 @@ public abstract class BoomParser {
     public void parse() throws IOException {
 
         this.start();
-
         while ((CurrectUTF8Char = this.getNextChar()) != -1) {
-            // CurrectUTF8Char = Integer.toHexString(ch).toUpperCase();
-            if (!DoubleQuoteStarted && !SingleQuoteStarted && (BoomTokenLib.isSpace(CurrectUTF8Char) || BoomTokenLib.isNewline(CurrectUTF8Char))) {
-
-                this.flash();
-            } else if (DoubleQuoteStarted || BoomTokenLib.isDoubleQuote(CurrectUTF8Char)) {
+            
+            if (DoubleQuoteStarted || BoomTokenLib.isDoubleQuote(CurrectUTF8Char)) {
+                /** Resolving strings */
                 if (DoubleQuoteStarted == false && BoomTokenLib.isDoubleQuote(CurrectUTF8Char)) {
                     //clear last chars as 'this is the start of string'
                     this.flash();
                     DoubleQuoteStarted = true;
-                } else if (DoubleQuoteStarted == true && BoomTokenLib.isDoubleQuote(CurrectUTF8Char)
-                        && !BoomTokenLib.isEscape(LastUTF8Char)) {
+                } 
+                else if (DoubleQuoteStarted == true && BoomTokenLib.isDoubleQuote(CurrectUTF8Char) && 
+                        !BoomTokenLib.isEscape(_LastUTF8Char))
+                {
                     //End of string
                     this.flash();
                     DoubleQuoteStarted = false;
-                } else {
-                    Sentense.add(CurrectUTF8Char);
                 }
-
+                else {
+                    //String not ended
+                    Sentence.add(CurrectUTF8Char);
+                }
+            }
+            else if (SingleQuoteStarted || BoomTokenLib.isSingleQuote(CurrectUTF8Char)) {
+                /** Resolving chars */
+                if (SingleQuoteStarted == false && BoomTokenLib.isSingleQuote(CurrectUTF8Char)) {
+                    //clear last chars as 'this is the start of string'
+                    this.flash();
+                    SingleQuoteStarted = true;
+                } else if (SingleQuoteStarted == true && BoomTokenLib.isSingleQuote(CurrectUTF8Char)
+                        && !BoomTokenLib.isEscape(_LastUTF8Char)) {
+                    //End of string
+                    this.flash();
+                    SingleQuoteStarted = false;
+                } else {
+                    //String not ended
+                    Sentence.add(CurrectUTF8Char);
+                }
+            }            
+            else if (!SingleQuoteStarted && (BoomTokenLib.isSpace(CurrectUTF8Char) || BoomTokenLib.isNewline(CurrectUTF8Char))) {
+                this.flash();
             } else if (BoomTokenLib.isSymbol(CurrectUTF8Char)) {
+                //If any suymbol found flush everything
+                //reset Sentence
                 this.flash();
             } else {
-                Sentense.add(CurrectUTF8Char);
+                Sentence.add(CurrectUTF8Char);
                 //log("0x" + Integer.toHexString(CurrectUTF8Char).toUpperCase() + ", ");
             }
 
-            this.LastUTF8Char = this.CurrectUTF8Char;
+            //Update last chars
+            this._2ndLastUTF8Char = this._LastUTF8Char;
+            this._LastUTF8Char = this.CurrectUTF8Char;
+            
         }
         this.end();
         //log("\n");
     }
 
+    /** Flushes Sentence, Empty Sentence */
     private void flash() {
         /**
          * Generate tokens
          */
-        if (DoubleQuoteStarted == false) {
-            Tokens = this.generateToken(Sentense);
+        if (DoubleQuoteStarted == false && SingleQuoteStarted == false) {
+            Tokens = this.generateToken(Sentence);
             /**
              * send tokens to host
              */
@@ -93,7 +119,7 @@ public abstract class BoomParser {
             /**
              * send tokens to host
              */
-            for (Integer tok : Sentense) {
+            for (Integer tok : Sentence) {
                 this.token(tok);
             }
         }
@@ -104,7 +130,7 @@ public abstract class BoomParser {
         /**
          * reset the word
          */
-        Sentense.clear();
+        Sentence.clear();
     }
 
     public ArrayList<String> generateToken(ArrayList<Integer> Sentense) {
