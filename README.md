@@ -21,5 +21,5 @@ We are finding friends know _**हिंदी(Hindi)**_ and _**ಕನರಾ(Kan
 ১০9Hello world ফাঁকা ৩০.৩৪
 ```
 
-`copyright(c) 2018. Redcof `
+copyright(c) 2018. int soumen
 
