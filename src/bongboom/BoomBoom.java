@@ -31,6 +31,7 @@ public class BoomBoom {
     static Reader buffer;
     static Writer fileWriter;
     static OutputStream op;
+    
     /**
      * @param args the command line arguments
      */

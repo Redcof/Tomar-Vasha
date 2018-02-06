@@ -1,0 +1,4 @@
+@import './screen.css';
+form { display: none; }
+div.u { border-top: 0; margin-bottom: 10px; }
+div tt { color: #000; }

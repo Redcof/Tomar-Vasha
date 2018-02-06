@@ -229,7 +229,7 @@ public class BoomTokenLib {
         if (BoomTokenLib.isNumber(sequence)) {
             String number = new String();
             for (Integer code : sequence) {
-                number += (char) code.intValue() - 0x09E6;
+                number += (char) code.intValue() - BoomTokenLib.NUMBERS[0];
             }
             return number;
         } else {
