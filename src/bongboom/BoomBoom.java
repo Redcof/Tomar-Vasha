@@ -1,6 +1,6 @@
 /*
  * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
+ * To change this template SrcFile, choose Tools | Templates
  * and open the template in the editor.
  */
 package bongboom;
@@ -31,15 +31,21 @@ public class BoomBoom {
     static Reader buffer;
     static Writer fileWriter;
     static OutputStream op;
-    
+    static File SrcFile;
+    static File JmidFile;
+    static File BoomFile;
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
-        File file = new File("src/res/hello.bong");
+        SrcFile = new File("src/res/hello.bong");
+        JmidFile = new File("src/res/hello.jmid");
+        BoomFile = new File("src/bongboom/chars/bengali.boom");
+        
+        
         Charset encoding = Charset.forName("UTF-8");
-        handleFile(file, encoding);
+        handleFile(SrcFile, encoding);
     }
 
     private static void handleFile(File file, Charset encoding)
@@ -56,7 +62,7 @@ public class BoomBoom {
                 @Override
                 public void start() {                   
                     try {
-                        op = new FileOutputStream(new File("src/res/hello.jmid"),false);
+                        op = new FileOutputStream(JmidFile,false);
                         Writer writer = new OutputStreamWriter(op, encoding);
                         fileWriter = new BufferedWriter(writer);
                     } catch (FileNotFoundException ex) {

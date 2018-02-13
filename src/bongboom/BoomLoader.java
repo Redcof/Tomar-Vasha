@@ -24,8 +24,18 @@ public class BoomLoader {
     public static final short MAX_LINE = 52;
     
     public static final String TITLE_REGEX = "(\\([a-z]+\\))\\s*(\\([a-z]+\\))\\s*(\\(.+?\\))";
-    public static final String KEYWORD_REGEX = "(\\([a-z]+\\))\\s*(\\(.+?\\))";
-    public static final String NUMBER_KEYWORD = "";
+    /**
+     * (\(\s*([a-z]+)\s*\))\s*(\(\s*(.+)\s*?\))
+     * Group 2: keyword from java
+     * Group 4: keyword from language 
+     */
+    public static final String KEYWORD_REGEX = "(\\(\\s*([a-z]+)\\s*\\))\\s*(\\(\\s*(.+)\\s*?\\))";
+    /**
+     * \((numbers)\)\s*\(([^\n\r]+)?\)
+     * Group 1 `number`
+     * Group 2 `0,1, 2,3    ,4,      5,6,7       ,    8,  9` Split-Trim
+     */
+    public static final String NUMBERS = "\\((numbers)\\)\\s*\\(([^\\n\\r]+)?\\)";
     
     public BoomLoader(String BoomFilePath) throws FileNotFoundException {
         this.BoomFilePath = BoomFilePath;
