@@ -33,7 +33,7 @@ public class BoomBoom {
     static OutputStream op;
     static File SrcFile;
     static File JmidFile;
-    static File BoomFile;
+    static StringBuffer BoomFilePath;
     /**
      * @param args the command line arguments
      */
@@ -41,11 +41,33 @@ public class BoomBoom {
         // TODO code application logic here
         SrcFile = new File("src/res/hello.bong");
         JmidFile = new File("src/res/hello.jmid");
-        BoomFile = new File("src/bongboom/chars/bengali.boom");
-        
+        BoomFilePath = new StringBuffer("src/bongboom/chars/bengali.boom");
         
         Charset encoding = Charset.forName("UTF-8");
-        handleFile(SrcFile, encoding);
+        BoomLoader languageLoader =  new BoomLoader(BoomFilePath, encoding) {
+            @Override
+            public void start() {
+                
+            }
+
+            @Override
+            public void completed() {
+                try {
+                    handleFile(BoomBoom.SrcFile, encoding);
+                } catch (IOException ex) {
+                    Logger.getLogger(BoomBoom.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            @Override
+            public void error(int code) {
+                
+            }
+        };
+              
+        
+        new Thread(languageLoader).start();
+        
     }
 
     private static void handleFile(File file, Charset encoding)
