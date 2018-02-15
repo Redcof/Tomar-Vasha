@@ -77,24 +77,37 @@ public abstract class BoomLoader implements Runnable {
     }
 
     public synchronized void load() {
-        StringBuilder line;
+        int langSeqLength = 0, SeqCtr = 0;
+        StringBuilder line, javaKeyword, languageCharSequence; 
+        String javaKeywordToken;
         Matcher matcher;
         this.start();
-        short ctr = TITLE_LINE;
+        short lineCtr = TITLE_LINE;
         try {
-            do {
-                line = new StringBuilder(buffer.readLine());
-                if (ctr > TITLE_LINE && ctr < NUMBER_LINE) {
-                    Pattern p = Pattern.compile(KEYWORD_REGEX.toString());
-                    
+            do {                
+                if (lineCtr > TITLE_LINE && lineCtr < NUMBER_LINE) {
+                    Pattern p = Pattern.compile(KEYWORD_REGEX.toString());                    
                     do{
+                        line = new StringBuilder(buffer.readLine());
                         matcher = p.matcher(line);
-                        matcher.group(2);//JAVA keyword
-                        matcher.group(4);//Eqv. Lang. Chars          
-                        ctr++;
-                    }while(ctr < NUMBER_LINE);
-
-                } else if (ctr == NUMBER_LINE) {
+                        
+                        javaKeyword = new StringBuilder(matcher.group(2));//JAVA keyword
+                        javaKeywordToken = "T_" + javaKeyword.toString().toUpperCase();
+                        
+                        languageCharSequence = new StringBuilder(matcher.group(4));//Eqv. Lang. Chars
+                        langSeqLength = languageCharSequence.length();
+                        
+                        int Sequence[] = new int[langSeqLength];
+                        
+                        for(SeqCtr = 0; SeqCtr < langSeqLength; SeqCtr++)
+                        {
+                            Sequence[SeqCtr] = (int)languageCharSequence.charAt(0);
+                        }
+                        KEYWORDS.put(javaKeywordToken, new BongUTF8CharSequence(javaKeywordToken, Sequence));
+                        lineCtr++;
+                    }while(lineCtr < NUMBER_LINE);
+                } else if (lineCtr == NUMBER_LINE) {
+                   line = new StringBuilder(buffer.readLine());
                    matcher = Pattern.compile(NUMBERS_REGEX.toString()).matcher(line);
                    String numbers = matcher.group(2);
                    String numbersa_arr[] = numbers.trim().split(",");
@@ -102,15 +115,16 @@ public abstract class BoomLoader implements Runnable {
                    for(String num : numbersa_arr){
                        NUMBERS.add((int)num.trim().charAt(0));
                    }
-                   ctr++;
-                } else if (ctr == TITLE_LINE) {
+                   lineCtr++;
+                } else if (lineCtr == TITLE_LINE) {
+                   line = new StringBuilder(buffer.readLine());
                    matcher = Pattern.compile(TITLE_REGEX.toString()).matcher(line);
                    LanguageTitleInEng = new StringBuffer(matcher.group(4));
                    LanguageTitleInLanguage = new StringBuffer(matcher.group(6));
-                   ctr++;
+                   lineCtr++;
                 }
                 
-            } while (ctr <= MAX_LINE);
+            } while (lineCtr <= MAX_LINE);
         } catch (IOException ex) {
             this.error(404);
             LoadCompleted = true;
