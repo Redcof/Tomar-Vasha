@@ -41,21 +41,31 @@ public abstract class BoomParser {
             System.out.print(s);
         }
     }
-
+    BoomTokenLib TokenLib;
+    
+    public BoomParser()
+    {
+        TokenLib = new BoomTokenLib();
+    }
+    
+    public BoomParser(BoomTokenLib tokenLib){
+        this.TokenLib = tokenLib;
+    }
+    
     public void parse() throws IOException {
-
         this.start();
+         
         while ((CurrectUTF8Char = this.getNextChar()) != -1) {
             
-            if (DoubleQuoteStarted || BoomTokenLib.isDoubleQuote(CurrectUTF8Char)) {
+            if (DoubleQuoteStarted || TokenLib.isDoubleQuote(CurrectUTF8Char)) {
                 /** Resolving strings */
-                if (DoubleQuoteStarted == false && BoomTokenLib.isDoubleQuote(CurrectUTF8Char)) {
+                if (DoubleQuoteStarted == false && TokenLib.isDoubleQuote(CurrectUTF8Char)) {
                     //clear last chars as 'this is the start of string'
                     this.flash();
                     DoubleQuoteStarted = true;
                 } 
-                else if (DoubleQuoteStarted == true && BoomTokenLib.isDoubleQuote(CurrectUTF8Char) && 
-                        !BoomTokenLib.isEscape(_LastUTF8Char))
+                else if (DoubleQuoteStarted == true && TokenLib.isDoubleQuote(CurrectUTF8Char) && 
+                        !TokenLib.isEscape(_LastUTF8Char))
                 {
                     //End of string
                     this.flash();
@@ -66,14 +76,14 @@ public abstract class BoomParser {
                     Sentence.add(CurrectUTF8Char);
                 }
             }
-            else if (SingleQuoteStarted || BoomTokenLib.isSingleQuote(CurrectUTF8Char)) {
+            else if (SingleQuoteStarted || TokenLib.isSingleQuote(CurrectUTF8Char)) {
                 /** Resolving chars */
-                if (SingleQuoteStarted == false && BoomTokenLib.isSingleQuote(CurrectUTF8Char)) {
+                if (SingleQuoteStarted == false && TokenLib.isSingleQuote(CurrectUTF8Char)) {
                     //clear last chars as 'this is the start of string'
                     this.flash();
                     SingleQuoteStarted = true;
-                } else if (SingleQuoteStarted == true && BoomTokenLib.isSingleQuote(CurrectUTF8Char)
-                        && !BoomTokenLib.isEscape(_LastUTF8Char)) {
+                } else if (SingleQuoteStarted == true && TokenLib.isSingleQuote(CurrectUTF8Char)
+                        && !TokenLib.isEscape(_LastUTF8Char)) {
                     //End of string
                     this.flash();
                     SingleQuoteStarted = false;
@@ -81,10 +91,10 @@ public abstract class BoomParser {
                     //String not ended
                     Sentence.add(CurrectUTF8Char);
                 }
-            }            
-            else if (!SingleQuoteStarted && (BoomTokenLib.isSpace(CurrectUTF8Char) || BoomTokenLib.isNewline(CurrectUTF8Char))) {
+            }
+            else if (!SingleQuoteStarted && (TokenLib.isSpace(CurrectUTF8Char) || TokenLib.isNewline(CurrectUTF8Char))) {
                 this.flash();
-            } else if (BoomTokenLib.isSymbol(CurrectUTF8Char)) {
+            } else if (TokenLib.isSymbol(CurrectUTF8Char)) {
                 //If any suymbol found flush everything
                 //reset Sentence
                 this.flash();
@@ -136,7 +146,7 @@ public abstract class BoomParser {
     public ArrayList<String> generateToken(ArrayList<Integer> Sentense) {
         ArrayList<String> Words = new ArrayList<>();
         if (Sentense.size() > 0) {
-            String token = BoomTokenLib.searchToken(Sentense);
+            String token = TokenLib.searchToken(Sentense);
             if (token != null) {
                 Words.add(token);
             } else {

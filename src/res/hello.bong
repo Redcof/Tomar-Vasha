@@ -1,8 +1,9 @@
-সবার শ্রেণী মানুষ{
-	সবার স্থির ফাঁকা শুরু(){
-		পূর্ণ আ = ১০;
-		দশমিক ব = ২০.৩৪;
-		দশমিক ড় = আ +'\\';
-		দেখ(ড় + "Hello world \"\\\"\\'' \\ ");
-	}
+public class Man{
+   public static void main()
+   {
+       int a = 20;
+       float x = 55.67;
+       float k = a + x;
+       print("Hello world " + k);
+   }
 }

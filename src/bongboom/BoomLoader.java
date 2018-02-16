@@ -22,15 +22,12 @@ import java.util.regex.Pattern;
  *
  * @author Arijit
  */
-public abstract class BoomLoader implements Runnable {
+public abstract class BoomLoader extends BoomTokenLib implements Runnable  {
 
     private StringBuffer BoomFilePath;
     private StringBuffer LanguageTitleInEng;
     private StringBuffer LanguageTitleInLanguage;
     private BufferedReader buffer;
-
-    private HashMap<String, BongUTF8CharSequence> KEYWORDS;
-    private ArrayList<Integer> NUMBERS;
 
     public static final short MAX_LINE = 52;
     public static final short TITLE_LINE = 1;
@@ -110,9 +107,9 @@ public abstract class BoomLoader implements Runnable {
                     if (matcher.find()) {
                         String numbers = matcher.group(2);
                         String numbersa_arr[] = numbers.trim().split(",");
-                        this.NUMBERS = new ArrayList<>();
+                        int ctr = 0;
                         for (String num : numbersa_arr) {
-                            NUMBERS.add((int) num.trim().charAt(0));
+                            NUMBERS[ctr] = ((int) num.trim().charAt(0));
                         }
                     }
                     lineCtr++;

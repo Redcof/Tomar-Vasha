@@ -1,6 +1,9 @@
-public class ID_8636{
-	public static void ID_40207(){
-		int ID_36751 = 10;
-		float ID_46517 = 20.34;
-		float ID_58853 = ID_36751 +'\\';
-		দেখ(ড় + "Hello world \"\\\"\\'' \\ "
+public class ID_6429{
+   public static ID_24499 ID_7078()
+   {
+       int ID_24929 = ID_37986;
+       float ID_30840 = ID_40810.ID_41837;
+       float ID_27499 = ID_24929 + ID_30840;
+       ID_35119("Hello world " + ID_27499);
+   }
+}

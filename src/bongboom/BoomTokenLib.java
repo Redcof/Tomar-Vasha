@@ -67,9 +67,10 @@ class BongUTF8CharSequence {
 
 public class BoomTokenLib {
 
-    public static final HashMap<String, BongUTF8CharSequence> KEYWORDS;
-
-    static {
+    protected HashMap<String, BongUTF8CharSequence> KEYWORDS;
+    
+    public BoomTokenLib()
+    {
         KEYWORDS = new HashMap<>();
 
         KEYWORDS.put("K_LF", new BongUTF8CharSequence("K_LF", new int[]{0xD}));//\n
@@ -78,9 +79,9 @@ public class BoomTokenLib {
         KEYWORDS.put("K_SPACE", new BongUTF8CharSequence("K_SPACE", new int[]{0x20}));//space
         KEYWORDS.put("K_TAB", new BongUTF8CharSequence("K_TAB", new int[]{0x9}));//tab
 
-        /**
-         * keywords
-         */
+        
+         // keywords
+         
         KEYWORDS.put("T_ABSTRACT", new BongUTF8CharSequence("T_ABSTRACT", new int[]{0x985, 0x9B8, 0x9AE, 0x9CD, 0x9AA, 0x9C2, 0x9B0, 0x9CD, 0x9A3}));
         KEYWORDS.put("T_CONTINUE", new BongUTF8CharSequence("T_CONTINUE", new int[]{0x99A, 0x9B2, 0x993}));
         KEYWORDS.put("T_FOR", new BongUTF8CharSequence("T_FOR", new int[]{0x99A, 0x9BE, 0x9B2, 0x9BE, 0x993}));
@@ -133,8 +134,9 @@ public class BoomTokenLib {
         KEYWORDS.put("T_WHILE", new BongUTF8CharSequence("T_WHILE", new int[]{0x9AF, 0x9A4, 0x9CB, 0x995, 0x9CD, 0x9B7, 0x9A}));
     }
 
+
     //public static final String SYMBOLSc = new String("/*-+`~!@#$%^&()_+|}{:?><,./;'\\][=-");
-    public static final Integer[] SYMBOLS = {
+    private Integer[] SYMBOLS = {
         0x2F, 0x2A, 0x2D, 0x2B, 0x60,
         0x7E, 0x21, 0x40, 0x23, 0x24,
         0x25, 0x5E, 0x26, 0x28, 0x29,
@@ -143,39 +145,39 @@ public class BoomTokenLib {
         0x2E, 0x2F, 0x3B, 0x5C, 0x5D,
         0x5B, 0x3D, 0x2D, 0x27
     };
-    public static final Integer DOUBLE_QUOTE = 0x22; //";
+    private Integer DOUBLE_QUOTE = 0x22; //";
 
-    public static final Integer SINGLE_QUOTE = 0x27; //'
+    private Integer SINGLE_QUOTE = 0x27; //'
     
-    public static final Integer ESCAPE = 0x5C; //\
+    private Integer ESCAPE = 0x5C; //\
     
     
 
-    public static final Integer[] NUMBERS = {
+    protected Integer[] NUMBERS = {
         0x09E6, 0x09E7, 0x09E8, 0x09E9, 0x09EA,
         0x09EB, 0x09EC, 0x9ED, 0x09EE, 0x09EF
     };
 
-    public static final Integer[] WHITE_SPACES = {
+    private Integer[] WHITE_SPACES = {
         0xD, 0xA, 0x20, 0x9
     //  \r   \n   \s    \t
     };
 
-    public static boolean isSpace(Integer unicode) {
+    public final boolean isSpace(Integer unicode) {
         return (unicode.intValue() == WHITE_SPACES[2] || unicode.intValue() == WHITE_SPACES[3]);
     }
 
-    public static boolean isNewline(Integer unicode) {
+    public final boolean isNewline(Integer unicode) {
         return (unicode.intValue() == WHITE_SPACES[0] || unicode.intValue() == WHITE_SPACES[1]);
     }
 
-    public static boolean isWhiteSpace(Integer unicode) {
+    public final boolean isWhiteSpace(Integer unicode) {
         return (isSpace(unicode) || isNewline(unicode));
     }
 
-    public static boolean isNumber(Integer unicode) {
+    public final boolean isNumber(Integer unicode) {
         boolean flag = false;
-        for (Integer code : BoomTokenLib.NUMBERS) {
+        for (Integer code : this.NUMBERS) {
             if (code.equals(unicode)) {
                 flag = true;
                 break;
@@ -184,10 +186,10 @@ public class BoomTokenLib {
         return flag;
     }
 
-    public static boolean isNumber(ArrayList<Integer> sequence) {
+    public final boolean isNumber(ArrayList<Integer> sequence) {
         boolean flag = true;
         for (Integer code : sequence) {
-            if (BoomTokenLib.isNumber(code) == false) {
+            if (this.isNumber(code) == false) {
                 flag = false;
                 break;
             }
@@ -195,9 +197,9 @@ public class BoomTokenLib {
         return flag;
     }
 
-    public static boolean isSymbol(Integer unicode) {
+    public final boolean isSymbol(Integer unicode) {
         boolean flag = false;
-        for (Integer code : BoomTokenLib.SYMBOLS) {
+        for (Integer code : this.SYMBOLS) {
             if (code.equals(unicode)) {
                 flag = true;
                 break;
@@ -206,30 +208,30 @@ public class BoomTokenLib {
         return flag;
     }
 
-    public static boolean isDoubleQuote(Integer unicode) {
-        return unicode.equals(BoomTokenLib.DOUBLE_QUOTE);
+    public final boolean isDoubleQuote(Integer unicode) {
+        return unicode.equals(this.DOUBLE_QUOTE);
     }
 
-    public static boolean isSingleQuote(Integer unicode) {
-        return unicode.equals(BoomTokenLib.SINGLE_QUOTE);
+    public final boolean isSingleQuote(Integer unicode) {
+        return unicode.equals(this.SINGLE_QUOTE);
     }
     
-    public static boolean isEscape(Integer unicode) {
-        return unicode.equals(BoomTokenLib.ESCAPE);
+    public final boolean isEscape(Integer unicode) {
+        return unicode.equals(this.ESCAPE);
     }
     
 
-    public static String searchToken(ArrayList<Integer> sequence) {
-        for (Map.Entry<String, BongUTF8CharSequence> entry : BoomTokenLib.KEYWORDS.entrySet()) {
+    public final String searchToken(ArrayList<Integer> sequence) {
+        for (Map.Entry<String, BongUTF8CharSequence> entry : this.KEYWORDS.entrySet()) {
             BongUTF8CharSequence temp = entry.getValue();
             if (temp.checkSequence(sequence)) {
                 return temp.getReplacement();
             }
         }
-        if (BoomTokenLib.isNumber(sequence)) {
+        if (this.isNumber(sequence)) {
             String number = new String();
             for (Integer code : sequence) {
-                number += (char) code.intValue() - BoomTokenLib.NUMBERS[0];
+                number += (char) code.intValue() - this.NUMBERS[0];
             }
             return number;
         } else {
