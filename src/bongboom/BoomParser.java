@@ -42,42 +42,43 @@ public abstract class BoomParser {
         }
     }
     BoomTokenLib TokenLib;
-    
-    public BoomParser()
-    {
+    BoomInferJSONLoader Infer;
+
+    public BoomParser() {
         TokenLib = new BoomTokenLib();
     }
-    
-    public BoomParser(BoomTokenLib tokenLib){
+
+    public BoomParser(BoomTokenLib tokenLib, BoomInferJSONLoader infer) {
         this.TokenLib = tokenLib;
+        this.Infer = infer;
     }
-    
+
     public void parse() throws IOException {
         this.start();
-         
+
         while ((CurrectUTF8Char = this.getNextChar()) != -1) {
-            
+
             if (DoubleQuoteStarted || TokenLib.isDoubleQuote(CurrectUTF8Char)) {
-                /** Resolving strings */
+                /**
+                 * Resolving strings
+                 */
                 if (DoubleQuoteStarted == false && TokenLib.isDoubleQuote(CurrectUTF8Char)) {
                     //clear last chars as 'this is the start of string'
                     this.flash();
                     DoubleQuoteStarted = true;
-                } 
-                else if (DoubleQuoteStarted == true && TokenLib.isDoubleQuote(CurrectUTF8Char) && 
-                        !TokenLib.isEscape(_LastUTF8Char))
-                {
+                } else if (DoubleQuoteStarted == true && TokenLib.isDoubleQuote(CurrectUTF8Char)
+                        && !TokenLib.isEscape(_LastUTF8Char)) {
                     //End of string
                     this.flash();
                     DoubleQuoteStarted = false;
-                }
-                else {
+                } else {
                     //String not ended
                     Sentence.add(CurrectUTF8Char);
                 }
-            }
-            else if (SingleQuoteStarted || TokenLib.isSingleQuote(CurrectUTF8Char)) {
-                /** Resolving chars */
+            } else if (SingleQuoteStarted || TokenLib.isSingleQuote(CurrectUTF8Char)) {
+                /**
+                 * Resolving chars
+                 */
                 if (SingleQuoteStarted == false && TokenLib.isSingleQuote(CurrectUTF8Char)) {
                     //clear last chars as 'this is the start of string'
                     this.flash();
@@ -91,8 +92,7 @@ public abstract class BoomParser {
                     //String not ended
                     Sentence.add(CurrectUTF8Char);
                 }
-            }
-            else if (!SingleQuoteStarted && (TokenLib.isSpace(CurrectUTF8Char) || TokenLib.isNewline(CurrectUTF8Char))) {
+            } else if (!SingleQuoteStarted && (TokenLib.isSpace(CurrectUTF8Char) || TokenLib.isNewline(CurrectUTF8Char))) {
                 this.flash();
             } else if (TokenLib.isSymbol(CurrectUTF8Char)) {
                 //If any suymbol found flush everything
@@ -106,13 +106,15 @@ public abstract class BoomParser {
             //Update last chars
             this._2ndLastUTF8Char = this._LastUTF8Char;
             this._LastUTF8Char = this.CurrectUTF8Char;
-            
+
         }
         this.end();
         //log("\n");
     }
 
-    /** Flushes Sentence, Empty Sentence */
+    /**
+     * Flushes Sentence, Empty Sentence
+     */
     private void flash() {
         /**
          * Generate tokens
@@ -143,14 +145,30 @@ public abstract class BoomParser {
         Sentence.clear();
     }
 
-    public ArrayList<String> generateToken(ArrayList<Integer> Sentense) {
+    private void dump(ArrayList<Integer> Sentense) {
+        int ctr = 0, len = Sentense.size();
+        System.out.print("[");
+        for (; ctr < len; ctr++) {
+            System.out.print((char) Sentense.get(ctr).intValue());
+        }
+        System.out.print("]\n");
+    }
+
+    public synchronized ArrayList<String> generateToken(ArrayList<Integer> Sentense) {
+        dump(Sentense);
         ArrayList<String> Words = new ArrayList<>();
         if (Sentense.size() > 0) {
             String token = TokenLib.searchToken(Sentense);
             if (token != null) {
                 Words.add(token);
             } else {
-                Words.add("ID_" + Fletcher16.generate(Sentense));
+                String fl16 = "ID_" + Fletcher16.generate(Sentense);
+                InferBundle ib = Infer.getFletcher16Value(fl16);
+                if (ib == null) {
+                    Words.add(fl16);
+                } else {
+                    Words.add(ib.getActual().toString());
+                }
             }
         }
         return Words;

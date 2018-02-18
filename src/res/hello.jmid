@@ -1,9 +1,9 @@
 public class ID_6429{
-   public static ID_24499 ID_7078()
+   public static ID_24499 main()
    {
-       int ID_24929 = ID_37986;
-       float ID_30840 = ID_40810.ID_41837;
+       int ID_24929 = 20;
+       float ID_30840 = 55.67;
        float ID_27499 = ID_24929 + ID_30840;
-       ID_35119("Hello world " + ID_27499);
+       System.out.ptint("Hello world " + ID_27499);
    }
 }

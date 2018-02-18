@@ -110,6 +110,7 @@ public abstract class BoomLoader extends BoomTokenLib implements Runnable  {
                         int ctr = 0;
                         for (String num : numbersa_arr) {
                             NUMBERS[ctr] = ((int) num.trim().charAt(0));
+                            ctr++;
                         }
                     }
                     lineCtr++;

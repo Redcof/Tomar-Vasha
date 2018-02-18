@@ -33,8 +33,10 @@ public class BoomBoom {
     static OutputStream op;
     static File SrcFile;
     static File JmidFile;
+    static File baseInferJSONFile;
     static StringBuffer BoomFilePath;
     static BoomLoader languageLoader;
+    static BoomInferJSONLoader InferJSONPkg;
     /**
      * @param args the command line arguments
      */
@@ -42,10 +44,14 @@ public class BoomBoom {
         // TODO code application logic here
         SrcFile = new File("src/res/hello.bong");
         JmidFile = new File("src/res/hello.jmid");
+        baseInferJSONFile = new  File("src/bongboom/chars/base_infer.json");
         BoomFilePath = new StringBuffer("src/bongboom/chars/english.boom");
         
+        
+        
         Charset encoding = Charset.forName("UTF-8");
-         languageLoader =  new BoomLoader(BoomFilePath, encoding) {
+        
+        languageLoader =  new BoomLoader(BoomFilePath, encoding) {
             @Override
             public void start() {
                 
@@ -65,7 +71,6 @@ public class BoomBoom {
                 
             }
         };
-              
         
         new Thread(languageLoader).start();
         
@@ -77,11 +82,9 @@ public class BoomBoom {
                 Reader reader = new InputStreamReader(in, encoding);
                 // buffer for efficiency
             Reader buffer = new BufferedReader(reader)) {
-            
-            
-            
+           InferJSONPkg = new BoomInferJSONLoader(baseInferJSONFile);
             BoomBoom.buffer = buffer;
-            BoomParser bp = new BoomParser(languageLoader) {
+            BoomParser bp = new BoomParser(languageLoader,InferJSONPkg) {
                 @Override
                 public void start() {                   
                     try {
