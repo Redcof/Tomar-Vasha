@@ -4,6 +4,6 @@ public class Man{
        int a = 20;
        float x = 55.67;
        float k = a + x;
-       print("Hello world " + k);
+       print("Hello \" \\ world " + k);
    }
 }

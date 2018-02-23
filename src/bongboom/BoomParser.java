@@ -7,6 +7,8 @@ package bongboom;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -52,52 +54,60 @@ public abstract class BoomParser {
         this.TokenLib = tokenLib;
         this.Infer = infer;
     }
-
+    private boolean Parsing = false;
+    public static final String REGEX_STRING = new String("\"((?:[^\\\\\"]|\\\\.)*)\"|([^\\s\"]+)");
     public void parse() throws IOException {
-        this.start();
+        if(!Parsing)
+        {
+            Parsing = true;
+            this.start();
 
         while ((CurrectUTF8Char = this.getNextChar()) != -1) {
 
             if (DoubleQuoteStarted || TokenLib.isDoubleQuote(CurrectUTF8Char)) {
-                /**
-                 * Resolving strings
-                 */
-                if (DoubleQuoteStarted == false && TokenLib.isDoubleQuote(CurrectUTF8Char)) {
-                    //clear last chars as 'this is the start of string'
-                    this.flash();
-                    DoubleQuoteStarted = true;
-                } else if (DoubleQuoteStarted == true && TokenLib.isDoubleQuote(CurrectUTF8Char)
-                        && !TokenLib.isEscape(_LastUTF8Char)) {
-                    //End of string
-                    this.flash();
-                    DoubleQuoteStarted = false;
-                } else {
-                    //String not ended
-                    Sentence.add(CurrectUTF8Char);
+                //clear last chars as 'this is the start of string'
+                this.flashSentense();
+                DoubleQuoteStarted = true;
+                
+                //Append double quote
+                Sentence.add(CurrectUTF8Char);
+                
+                //Hold control untill string found
+                while((CurrectUTF8Char = this.getNextChar()) == -1){
+                    switch(CurrectUTF8Char)
+                    {
+                        case '\\':
+                        break;
+                    }
+                    
                 }
+                
+                //End of string
+                this.flashSentense();
+                DoubleQuoteStarted = false;
             } else if (SingleQuoteStarted || TokenLib.isSingleQuote(CurrectUTF8Char)) {
                 /**
                  * Resolving chars
                  */
                 if (SingleQuoteStarted == false && TokenLib.isSingleQuote(CurrectUTF8Char)) {
                     //clear last chars as 'this is the start of string'
-                    this.flash();
+                    this.flashSentense();
                     SingleQuoteStarted = true;
                 } else if (SingleQuoteStarted == true && TokenLib.isSingleQuote(CurrectUTF8Char)
                         && !TokenLib.isEscape(_LastUTF8Char)) {
                     //End of string
-                    this.flash();
+                    this.flashSentense();
                     SingleQuoteStarted = false;
                 } else {
                     //String not ended
                     Sentence.add(CurrectUTF8Char);
                 }
             } else if (!SingleQuoteStarted && (TokenLib.isSpace(CurrectUTF8Char) || TokenLib.isNewline(CurrectUTF8Char))) {
-                this.flash();
+                this.flashSentense();
             } else if (TokenLib.isSymbol(CurrectUTF8Char)) {
                 //If any suymbol found flush everything
                 //reset Sentence
-                this.flash();
+                this.flashSentense();
             } else {
                 Sentence.add(CurrectUTF8Char);
                 //log("0x" + Integer.toHexString(CurrectUTF8Char).toUpperCase() + ", ");
@@ -110,12 +120,14 @@ public abstract class BoomParser {
         }
         this.end();
         //log("\n");
+        Parsing = false;
+        }
     }
 
     /**
      * Flushes Sentence, Empty Sentence
      */
-    private void flash() {
+    private void flashSentense() {
         /**
          * Generate tokens
          */
@@ -155,7 +167,7 @@ public abstract class BoomParser {
     }
 
     public synchronized ArrayList<String> generateToken(ArrayList<Integer> Sentense) {
-        dump(Sentense);
+        //dump(Sentense);
         ArrayList<String> Words = new ArrayList<>();
         if (Sentense.size() > 0) {
             String token = TokenLib.searchToken(Sentense);
