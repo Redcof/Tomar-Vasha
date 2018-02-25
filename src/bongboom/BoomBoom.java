@@ -63,6 +63,8 @@ public class BoomBoom {
                     handleFile(BoomBoom.SrcFile, encoding);
                 } catch (IOException ex) {
                     Logger.getLogger(BoomBoom.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (Exception ex) {
+                    Logger.getLogger(BoomBoom.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -77,7 +79,7 @@ public class BoomBoom {
     }
 
     private static void handleFile(File file, Charset encoding)
-            throws IOException {
+            throws IOException, Exception {
         try (InputStream in = new FileInputStream(file);
                 Reader reader = new InputStreamReader(in, encoding);
                 // buffer for efficiency

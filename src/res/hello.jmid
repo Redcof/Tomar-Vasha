@@ -1,0 +1,10 @@
+public class ID_6429{
+   public static ID_24499 main()
+   {
+       int ID_24929 = 20;
+       float ID_30840 = 55.67;
+       float ID_27499 = ID_24929 + ID_30840;
+       char ID_28013 = ''\t'';
+       System.out.ptint(""Hello \" \\ world \n \t"" + ID_27499);
+   }
+}

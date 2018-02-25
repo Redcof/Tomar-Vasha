@@ -7,8 +7,6 @@ package bongboom;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -29,8 +27,8 @@ public abstract class BoomParser {
     boolean DoubleQuoteStarted = false;
     boolean SingleQuoteStarted = false;
 
-    int _LastUTF8Char = 0;
-    int _2ndLastUTF8Char = 0;
+    //int _LastUTF8Char = 0;
+    //int _2ndLastUTF8Char = 0;
     int CurrectUTF8Char;
 
     ArrayList<Integer> Sentence = new ArrayList<>();
@@ -55,73 +53,178 @@ public abstract class BoomParser {
         this.Infer = infer;
     }
     private boolean Parsing = false;
-    public static final String REGEX_STRING = new String("\"((?:[^\\\\\"]|\\\\.)*)\"|([^\\s\"]+)");
-    public void parse() throws IOException {
-        if(!Parsing)
-        {
+    
+    public void parse() throws IOException, Exception {
+        if (!Parsing) {
             Parsing = true;
             this.start();
 
-        while ((CurrectUTF8Char = this.getNextChar()) != -1) {
-
-            if (DoubleQuoteStarted || TokenLib.isDoubleQuote(CurrectUTF8Char)) {
-                //clear last chars as 'this is the start of string'
-                this.flashSentense();
-                DoubleQuoteStarted = true;
-                
-                //Append double quote
-                Sentence.add(CurrectUTF8Char);
-                
-                //Hold control untill string found
-                while((CurrectUTF8Char = this.getNextChar()) == -1){
-                    switch(CurrectUTF8Char)
-                    {
-                        case '\\':
-                        break;
-                    }
-                    
-                }
-                
-                //End of string
-                this.flashSentense();
-                DoubleQuoteStarted = false;
-            } else if (SingleQuoteStarted || TokenLib.isSingleQuote(CurrectUTF8Char)) {
-                /**
-                 * Resolving chars
-                 */
-                if (SingleQuoteStarted == false && TokenLib.isSingleQuote(CurrectUTF8Char)) {
+            while (nextChar()) {
+                if (TokenLib.isDoubleQuote(CurrectUTF8Char)) {
                     //clear last chars as 'this is the start of string'
                     this.flashSentense();
-                    SingleQuoteStarted = true;
-                } else if (SingleQuoteStarted == true && TokenLib.isSingleQuote(CurrectUTF8Char)
-                        && !TokenLib.isEscape(_LastUTF8Char)) {
+                    DoubleQuoteStarted = true;
+
+                    //Block untill string parsed
+                    this.parseStr();
+
                     //End of string
                     this.flashSentense();
+                    DoubleQuoteStarted = false;
+                } else if (TokenLib.isSingleQuote(CurrectUTF8Char)) {
+                    /**
+                     * Resolving chars
+                     */
+                    //clear last chars as 'this is the start of char'
+                    this.flashSentense();
+                    SingleQuoteStarted = true;
+
+                    //Block untill character parsed
+                    this.parseChar();
+
+                    //End of character
+                    this.flashSentense();
                     SingleQuoteStarted = false;
+                } else if (!SingleQuoteStarted && (TokenLib.isSpace(CurrectUTF8Char) || TokenLib.isNewline(CurrectUTF8Char))) {
+                    this.flashSentense();
+                } else if (TokenLib.isSymbol(CurrectUTF8Char)) {
+                    //If any suymbol found flush everything
+                    //reset Sentence
+                    this.flashSentense();
                 } else {
-                    //String not ended
                     Sentence.add(CurrectUTF8Char);
+                    //log("0x" + Integer.toHexString(CurrectUTF8Char).toUpperCase() + ", ");
                 }
-            } else if (!SingleQuoteStarted && (TokenLib.isSpace(CurrectUTF8Char) || TokenLib.isNewline(CurrectUTF8Char))) {
-                this.flashSentense();
-            } else if (TokenLib.isSymbol(CurrectUTF8Char)) {
-                //If any suymbol found flush everything
-                //reset Sentence
-                this.flashSentense();
-            } else {
-                Sentence.add(CurrectUTF8Char);
-                //log("0x" + Integer.toHexString(CurrectUTF8Char).toUpperCase() + ", ");
+
             }
-
-            //Update last chars
-            this._2ndLastUTF8Char = this._LastUTF8Char;
-            this._LastUTF8Char = this.CurrectUTF8Char;
-
+            this.end();
+            //log("\n");
+            Parsing = false;
         }
-        this.end();
-        //log("\n");
-        Parsing = false;
+    }
+
+    boolean nextChar() throws IOException {
+        return ((CurrectUTF8Char = this.getNextChar()) != -1);
+    }
+
+    void parseStr() throws Exception {
+        Sentence.add(CurrectUTF8Char);
+        while (nextChar()) {
+            Sentence.add(CurrectUTF8Char);
+            if (CurrectUTF8Char == '\"') {
+                //end of string
+                break;
+            }
+            if(this.TokenLib.isNewline(CurrectUTF8Char))
+            {
+                throw new Exception("Unexpected new line when parsing string.");
+            }
+            if (CurrectUTF8Char == '\\') {
+                //get the next char
+                if (!nextChar()) {
+                    //Not found; Break loop
+                    throw new Exception("Unexpected EOF reatched when parsing string.");
+                }
+                Sentence.add(CurrectUTF8Char);
+
+                switch (CurrectUTF8Char) {
+                    /* Allowed escaped symbols */
+                    case '\"':
+                    case '/':
+                    case '\\':
+                    case 'b':
+                    case 'f':
+                    case 'r':
+                    case 'n':
+                    case 't':
+                        break;
+                    case 'u':
+                        //get next char                        
+                        for (int i = 0; i < 4 && nextChar(); i++) {
+                            Sentence.add(CurrectUTF8Char);
+                            /* If it isn't a hex character we have an error */
+                            if (!((CurrectUTF8Char >= 48 && CurrectUTF8Char <= 57)
+                                    /* 0-9 */
+                                    || (CurrectUTF8Char >= 65 && CurrectUTF8Char <= 70)
+                                    /* A-F */
+                                    || (CurrectUTF8Char >= 97 && CurrectUTF8Char <= 102)/* a-f */)) {
+
+                                // Error parsing string
+                                throw new Exception("Unexpected symbol : " + (char) CurrectUTF8Char + " when parsing string.");
+                            }
+                        }
+                        break;
+                    /* Unexpected symbol */
+                        
+                    default:
+                        // Error parsing string
+                        char c = '\u0000';
+                        throw new Exception("Unexpected symbol " + (char) CurrectUTF8Char + " when parsing string.");
+                }
+            }
         }
+
+    }
+
+    void parseChar() throws Exception {
+        Sentence.add(CurrectUTF8Char);
+        while (nextChar()) {
+            Sentence.add(CurrectUTF8Char);
+            if (CurrectUTF8Char == '\'') {
+                if(Sentence.size() == 2){
+                    throw new Exception("Unexpected single quote(') when parsing character.");
+                }
+                //end of char
+                break;
+            }
+            if(this.TokenLib.isNewline(CurrectUTF8Char))
+            {
+                throw new Exception("Unexpected new line when parsing character.");
+            }
+            if (CurrectUTF8Char == '\\') {
+                //get the next char
+                if (!nextChar()) {
+                    //Not found; Break loop
+                    throw new Exception("Unexpected EOF reatched when parsing character.");
+                }
+                Sentence.add(CurrectUTF8Char);
+
+                switch (CurrectUTF8Char) {
+                    /* Allowed escaped symbols */
+                    case '\"':
+                    case '/':
+                    case '\\':
+                    case 'b':
+                    case 'f':
+                    case 'r':
+                    case 'n':
+                    case 't':
+                        break;
+                    case 'u':
+                        //get next symbol                        
+                        for (int i = 0; i < 4 && nextChar(); i++) {
+                            Sentence.add(CurrectUTF8Char);
+                            /* If it isn't a hex character we have an error */
+                            if (!((CurrectUTF8Char >= 48 && CurrectUTF8Char <= 57)
+                                    /* 0-9 */
+                                    || (CurrectUTF8Char >= 65 && CurrectUTF8Char <= 70)
+                                    /* A-F */
+                                    || (CurrectUTF8Char >= 97 && CurrectUTF8Char <= 102)/* a-f */)) {
+
+                                // Error parsing string
+                                throw new Exception("Unexpected symbol : " + (char) CurrectUTF8Char + " when parsing character.");
+                            }
+                        }
+                        break;
+                    /* Unexpected symbol */
+                        
+                    default:
+                        // Error parsing char
+                        throw new Exception("Unexpected symbol " + (char) CurrectUTF8Char + " when parsing character.");
+                }
+            }
+        }
+
     }
 
     /**
