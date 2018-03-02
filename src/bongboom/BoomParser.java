@@ -16,7 +16,7 @@ public abstract class BoomParser {
 
     public abstract void start();
 
-    public abstract int getNextChar() throws IOException;
+    public abstract String getNextLine() throws IOException;
 
     public abstract void token(String token);
 
@@ -33,7 +33,9 @@ public abstract class BoomParser {
 
     ArrayList<Integer> Sentence = new ArrayList<>();
     ArrayList<String> Tokens;
-
+    String SourceLine;
+    int ColumnIndex = 0, SourceLineLength = 0, LineNumber = 0;
+    
     private boolean log = true;
 
     private void log(String s) {
@@ -103,8 +105,35 @@ public abstract class BoomParser {
         }
     }
 
+    /**
+     * Read next character symbol from file. Return true
+     * on success. Else return return false;
+     * @return boolean
+     * @throws IOException 
+     */
     boolean nextChar() throws IOException {
-        return ((CurrectUTF8Char = this.getNextChar()) != -1);
+        //if the column index is equal to length
+        //new line need to be read
+        if(ColumnIndex == SourceLineLength)
+        {
+            SourceLine = this.getNextLine();
+            if(SourceLine != null)
+            {
+                //add a newline at the end of string as newline omitted already
+                SourceLine += "\n";
+                //update length
+                SourceLineLength = SourceLine.length();
+                //increase line number
+                LineNumber++;
+            }
+            else{
+                //End of file
+                return false;
+            }
+            //reset column index to zero
+            ColumnIndex = 0;
+        }
+        return ((CurrectUTF8Char = this.SourceLine.charAt(ColumnIndex++)) != -1);
     }
 
     void parseStr() throws Exception {

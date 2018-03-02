@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class BoomBoom {
 
-    static Reader buffer;
+    static BufferedReader buffer;
     static Writer fileWriter;
     static OutputStream op;
     static File SrcFile;
@@ -37,6 +37,7 @@ public class BoomBoom {
     static StringBuffer BoomFilePath;
     static BoomLoader languageLoader;
     static BoomInferJSONLoader InferJSONPkg;
+
     /**
      * @param args the command line arguments
      */
@@ -44,17 +45,15 @@ public class BoomBoom {
         // TODO code application logic here
         SrcFile = new File("src/res/hello.bong");
         JmidFile = new File("src/res/hello.jmid");
-        baseInferJSONFile = new  File("src/bongboom/chars/base_infer.json");
+        baseInferJSONFile = new File("src/bongboom/chars/base_infer.json");
         BoomFilePath = new StringBuffer("src/bongboom/chars/english.boom");
-        
-        
-        
+
         Charset encoding = Charset.forName("UTF-8");
-        
-        languageLoader =  new BoomLoader(BoomFilePath, encoding) {
+
+        languageLoader = new BoomLoader(BoomFilePath, encoding) {
             @Override
             public void start() {
-                
+
             }
 
             @Override
@@ -70,37 +69,37 @@ public class BoomBoom {
 
             @Override
             public void error(int code) {
-                
+
             }
         };
-        
+
         new Thread(languageLoader).start();
-        
+
     }
 
     private static void handleFile(File file, Charset encoding)
             throws IOException, Exception {
         try (InputStream in = new FileInputStream(file);
-                Reader reader = new InputStreamReader(in, encoding);
-                // buffer for efficiency
-            Reader buffer = new BufferedReader(reader)) {
-           InferJSONPkg = new BoomInferJSONLoader(baseInferJSONFile);
+            // buffer for efficiency
+            BufferedReader buffer = new BufferedReader(new InputStreamReader(in, encoding))) {
+            InferJSONPkg = new BoomInferJSONLoader(baseInferJSONFile);
             BoomBoom.buffer = buffer;
-            BoomParser bp = new BoomParser(languageLoader,InferJSONPkg) {
+            
+            BoomParser bp = new BoomParser(languageLoader, InferJSONPkg) {
                 @Override
-                public void start() {                   
+                public void start() {
                     try {
-                        op = new FileOutputStream(JmidFile,false);
+                        op = new FileOutputStream(JmidFile, false);
                         Writer writer = new OutputStreamWriter(op, encoding);
                         fileWriter = new BufferedWriter(writer);
                     } catch (FileNotFoundException ex) {
                         Logger.getLogger(BoomBoom.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                
+
                 @Override
-                public int getNextChar() throws IOException {
-                    return BoomBoom.buffer.read();
+                public String getNextLine() throws IOException {
+                    return BoomBoom.buffer.readLine();
                 }
 
                 @Override
@@ -112,7 +111,7 @@ public class BoomBoom {
                         Logger.getLogger(BoomBoom.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-                
+
                 @Override
                 public void token(Integer token) {
                     int tok = token.intValue();
@@ -126,19 +125,17 @@ public class BoomBoom {
 
                 @Override
                 public void end() {
-                    try {                        
-                        fileWriter.close(); 
+                    try {
+                        fileWriter.close();
                         op.close();
                     } catch (IOException ex) {
                         Logger.getLogger(BoomBoom.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
 
-                
             };
             bp.parse();
-            
-            
+
         };
     }
 
