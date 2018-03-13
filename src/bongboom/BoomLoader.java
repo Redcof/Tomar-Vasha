@@ -13,8 +13,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,9 +29,9 @@ public abstract class BoomLoader extends BoomTokenLib implements Runnable  {
     private StringBuffer LanguageTitleInLanguage;
     private BufferedReader buffer;
 
-    public static final short MAX_LINE = 52;
+    public static final short MAX_LINE = 26;
     public static final short TITLE_LINE = 1;
-    public static final short NUMBER_LINE = 52;
+    public static final short NUMBER_LINE = MAX_LINE;
 
     /**
      * (\(\s*(title)\s*\))\s*(\(\s*([a-z]+)\s*\))\s*(\(\s*([^\s\n\r]+)\s*?\))
@@ -40,10 +40,10 @@ public abstract class BoomLoader extends BoomTokenLib implements Runnable  {
      */
     public static final StringBuffer TITLE_REGEX = new StringBuffer("(\\(\\s*(title)\\s*\\))\\s*(\\(\\s*([a-z]+)\\s*\\))\\s*(\\(\\s*([^\\s\\n\\r]+)\\s*?\\))");
     /**
-     * (\(\s*([a-z]+)\s*\))\s*(\(\s*(.+)\s*?\)) Group 2: keyword from java Group
-     * 4: equivalent keyword from language
+     * (\(\s*([a-z]+(\s[a-z]+)*)\s*\))\s*(\(\s*([a-z]+(\s[a-z]+)*)\s*\)) Group 2: keyword from java Group
+     * 5: equivalent keyword from language
      */
-    public static final StringBuffer KEYWORD_REGEX = new StringBuffer("(\\(\\s*([a-z]+)\\s*\\))\\s*(\\(\\s*(.+)\\s*?\\))");
+    public static final StringBuffer KEYWORD_REGEX = new StringBuffer("(\\(\\s*([a-z]+(\\s[a-z]+)*)\\s*\\))\\s*(\\(\\s*([a-z]+(\\s[a-z]+)*)\\s*\\))");
     /**
      * \(\s*(numbers)\s*\)\s*\(([^\n\r]+)?\) Group 1: `numbers` Group 2: `0,1,
      * 2,3 ,4, 5,6,7 , 8, 9` then do Split-Trim
@@ -72,7 +72,8 @@ public abstract class BoomLoader extends BoomTokenLib implements Runnable  {
 
     public synchronized void load() {
         int langSeqLength = 0, SeqCtr = 0;
-        StringBuilder line, javaKeyword, languageCharSequence;
+        StringBuilder line, boomKeyword, languageCharSequence;
+        StringTokenizer tokens ;
         String javaKeywordToken;
         Matcher matcher;
         this.start();
@@ -86,8 +87,9 @@ public abstract class BoomLoader extends BoomTokenLib implements Runnable  {
                         line = new StringBuilder(buffer.readLine());
                         matcher = p.matcher(line);
                         if (matcher.find()) {
-                            javaKeyword = new StringBuilder(matcher.group(2));//JAVA keyword
-                            javaKeywordToken = "T_" + javaKeyword.toString().toUpperCase();
+                            boomKeyword = new StringBuilder(matcher.group(2));// keyword
+                            tokens = new StringTokenizer(boomKeyword.toString());
+                            javaKeywordToken = boomKeyword.toString().toUpperCase();
 
                             languageCharSequence = new StringBuilder(matcher.group(4));//Eqv. Lang. Chars
                             langSeqLength = languageCharSequence.length();
@@ -96,8 +98,8 @@ public abstract class BoomLoader extends BoomTokenLib implements Runnable  {
 
                             for (SeqCtr = 0; SeqCtr < langSeqLength; SeqCtr++) {
                                 Sequence[SeqCtr] = (int) languageCharSequence.charAt(SeqCtr);
-                            }
-                            KEYWORDS.put(javaKeywordToken, new BongUTF8CharSequence(javaKeywordToken, Sequence));
+                            }                            
+                            KEYWORDS.put(javaKeywordToken, new BongUTF8CharSequence(javaKeywordToken, Sequence, tokens.countTokens()));
                         }
                         lineCtr++;
                     } while (lineCtr < NUMBER_LINE);

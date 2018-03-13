@@ -60,7 +60,6 @@ public abstract class BoomParser {
         if (!Parsing) {
             Parsing = true;
             this.start();
-
             while (nextChar()) {
                 if (TokenLib.isDoubleQuote(CurrectUTF8Char)) {
                     //clear last chars as 'this is the start of string'
@@ -186,8 +185,7 @@ public abstract class BoomParser {
                     /* Unexpected symbol */
                         
                     default:
-                        // Error parsing string
-                        char c = '\u0000';
+                        // Error parsing string                        
                         throw new Exception("Unexpected symbol " + (char) CurrectUTF8Char + " when parsing string.");
                 }
             }

@@ -56,7 +56,7 @@ public class BoomInferJSONLoader {
     HashMap<String, InferBundle> InferBundleList = new HashMap<>();
     public static final String KEY_INFER_LIST = "infer-list";
 
-    public BoomInferJSONLoader(File jsonPath) throws FileNotFoundException, IOException {
+    public BoomInferJSONLoader(File jsonPath) throws FileNotFoundException, IOException, JSONException {
 
         InputStream is = new FileInputStream(jsonPath);
         BufferedReader buf = new BufferedReader(new InputStreamReader(is));

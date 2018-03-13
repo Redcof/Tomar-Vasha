@@ -72,7 +72,6 @@ public class BoomBoom {
 
             }
         };
-
         new Thread(languageLoader).start();
 
     }
